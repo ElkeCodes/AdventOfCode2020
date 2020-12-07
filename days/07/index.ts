@@ -58,27 +58,21 @@ function runPartB() {
     };
   });
 
-  const count = (searchStrings: string[]): number => {
-    if (searchStrings.length === 0) {
+  const count = (searchString: string): number => {
+    const found = rules.find((rule) => rule.colour === searchString);
+    if (!found) {
       return 0;
     } else {
-      const [searchString, ...remainingSearchStrings] = searchStrings;
-      const found = rules.find((rule) => rule.colour === searchString);
-
-      if (!found) {
-        return 0;
-      } else {
-        return (
-          1 +
-          found.contents
-            .map((content) => content.amount * count([content.colour]))
-            .reduce((prev, curr) => prev + curr, 0)
-        );
-      }
+      return (
+        1 +
+        found.contents
+          .map((content) => content.amount * count(content.colour))
+          .reduce((prev, curr) => prev + curr, 0)
+      );
     }
   };
 
-  return count(["shiny gold"]) - 1;
+  return count("shiny gold") - 1;
 }
 
 console.log(`Solution part A: ${runPartA()}`);
