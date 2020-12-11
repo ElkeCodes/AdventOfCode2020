@@ -133,12 +133,7 @@ function runPartB() {
     const checked = Array.from({ length: 8 }).fill(0);
     const orderedSeats = seatsAround(x, y);
     for (let i = 0; i < Math.floor(orderedSeats.length / 8); i++) {
-      const seatsToCheck = orderedSeats
-        .slice(i * 8, i * 8 + 8)
-        .sort(
-          (seat1, seat2) =>
-            Math.abs(seat2[0] - seat1[0]) - Math.abs(seat2[1] - seat1[1])
-        );
+      const seatsToCheck = orderedSeats.slice(i * 8, i * 8 + 8);
       for (let j = 0; j < 8; j++) {
         const seatToCheck = seatsToCheck[j];
         if (
@@ -161,19 +156,17 @@ function runPartB() {
     );
   };
 
-  const isEqualSeatArrangement = (seats1, seats2) =>
-    seats1.reduce(
-      (prevRowCompare, currentRow, rowIndex) =>
-        prevRowCompare &&
-        currentRow.reduce(
-          (prevColumnCompare, seatAssignment, columnIndex) =>
-            prevColumnCompare &&
-            seatAssignment === seats2[rowIndex][columnIndex],
-          true
-        ),
-      true
-    );
-
+  const isEqualSeatArrangement = (seats1, seats2) => {
+    for (let i = 0; i < seats1.length; i++) {
+      for (let j = 0; j < seats1[0].length; j++) {
+        if (seats1[i][j] !== seats2[i][j]) {
+          return false;
+        }
+      }
+    }
+    return true;
+  };
+  
   const fill = (seats) => {
     let newSeats = [...seats.map((row) => [...row])];
     for (let row = 0; row < seatRowsAmount; row++) {
