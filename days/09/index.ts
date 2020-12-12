@@ -5,7 +5,7 @@ function runPartA() {
   const numbersList = fileData.map((line) => Number.parseInt(line, 10));
 
   const findSum = (sum, numbersList: number[]): number => {
-    if (numbersList.length <= 1) {
+    if (numbersList.length <= 1) { 
       return 0;
     } else {
       const [firstNumber, ...remainingNubmers] = numbersList;
