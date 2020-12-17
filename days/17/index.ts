@@ -43,9 +43,55 @@ function* expanded(
   }
 }
 
-function runPartA() {
-  const data = readFile("17", "a") as string[];
+const cycle = (
+  cubes: Map<string, Cube>,
+  amount: number,
+  createExpanded: Function
+): number => {
+  const inner = (
+    cubes: Map<string, Cube>,
+    delta: number
+  ): Map<string, Cube> => {
+    if (delta === amount) {
+      return cubes;
+    } else {
+      const newCubes = new Map<string, Cube>();
+      for (const [key, cube] of cubes) {
+        for (let newCube of createExpanded(cube)) {
+          if (newCubes.has(getKey(newCube))) {
+            continue;
+          }
+          const activeNeighbours = countActiveNeighbours(cubes, newCube, 1);
+          const oldCube = cubes.get(getKey(newCube)) || {
+            ...newCube,
+            active: false,
+          };
+          if (
+            oldCube.active &&
+            (activeNeighbours === 2 || activeNeighbours === 3)
+          ) {
+            newCubes.set(getKey(newCube), {
+              ...newCube,
+              active: true,
+            });
+          } else if (!oldCube.active && activeNeighbours === 3) {
+            newCubes.set(getKey(newCube), {
+              ...newCube,
+              active: true,
+            });
+          }
+        }
+      }
+      return inner(newCubes, delta + 1);
+    }
+  };
 
+  return Array.from(inner(cubes, 0))
+    .map(([_, cube]) => cube)
+    .reduce((prev, cube) => prev + (cube.active ? 1 : 0), 0);
+};
+
+const parse = (data: string[]): Map<string, Cube> => {
   let cubes: Map<string, Cube> = new Map();
   data
     .map((line: string, y: number) =>
@@ -61,117 +107,18 @@ function runPartA() {
     )
     .reduce((acc, val) => acc.concat(val), [])
     .forEach((cube) => cubes.set(getKey(cube), cube));
+  return cubes;
+};
 
-  const cycle = (cubes: Map<string, Cube>, amount: number): number => {
-    const inner = (
-      cubes: Map<string, Cube>,
-      delta: number
-    ): Map<string, Cube> => {
-      if (delta === amount) {
-        return cubes;
-      } else {
-        const newCubes = new Map<string, Cube>();
-        for (const [key, cube] of cubes) {
-          for (let newCube of expanded(cube.x, cube.y, cube.z, 0, 0)) {
-            if (newCubes.has(getKey(newCube))) {
-              continue;
-            }
-            const activeNeighbours = countActiveNeighbours(cubes, newCube, 0);
-            const oldCube = cubes.get(getKey(newCube)) || {
-              ...newCube,
-              active: false,
-            };
-            if (
-              oldCube.active &&
-              (activeNeighbours === 2 || activeNeighbours === 3)
-            ) {
-              newCubes.set(getKey(newCube), {
-                ...newCube,
-                active: true,
-              });
-            } else if (!oldCube.active && activeNeighbours === 3) {
-              newCubes.set(getKey(newCube), {
-                ...newCube,
-                active: true,
-              });
-            }
-          }
-        }
-        return inner(newCubes, delta + 1);
-      }
-    };
+const runPartA = () =>
+  cycle(parse(readFile("17", "a") as string[]), 6, (cube: Cube) =>
+    expanded(cube.x, cube.y, cube.z, 0, 0)
+  );
 
-    return Array.from(inner(cubes, 0))
-      .map(([_, cube]) => cube)
-      .reduce((prev, cube) => prev + (cube.active ? 1 : 0), 0);
-  };
-  return cycle(cubes, 6);
-}
-
-function runPartB() {
-  const data = readFile("17", "b") as string[];
-
-  let cubes: Map<string, Cube> = new Map();
-  data
-    .map((line: string, y: number) =>
-      line.split("").map(
-        (state, x): Cube => ({
-          x,
-          y,
-          z: 0,
-          w: 0,
-          active: state === "#",
-        })
-      )
-    )
-    .reduce((acc, val) => acc.concat(val), [])
-    .forEach((cube) => cubes.set(getKey(cube), cube));
-
-  const cycle = (cubes: Map<string, Cube>, amount: number): number => {
-    const inner = (
-      cubes: Map<string, Cube>,
-      delta: number
-    ): Map<string, Cube> => {
-      if (delta === amount) {
-        return cubes;
-      } else {
-        const newCubes = new Map<string, Cube>();
-        for (const [key, cube] of cubes) {
-          for (let newCube of expanded(cube.x, cube.y, cube.z, cube.w, 1)) {
-            if (newCubes.has(getKey(newCube))) {
-              continue;
-            }
-            const activeNeighbours = countActiveNeighbours(cubes, newCube, 1);
-            const oldCube = cubes.get(getKey(newCube)) || {
-              ...newCube,
-              active: false,
-            };
-            if (
-              oldCube.active &&
-              (activeNeighbours === 2 || activeNeighbours === 3)
-            ) {
-              newCubes.set(getKey(newCube), {
-                ...newCube,
-                active: true,
-              });
-            } else if (!oldCube.active && activeNeighbours === 3) {
-              newCubes.set(getKey(newCube), {
-                ...newCube,
-                active: true,
-              });
-            }
-          }
-        }
-        return inner(newCubes, delta + 1);
-      }
-    };
-
-    return Array.from(inner(cubes, 0))
-      .map(([_, cube]) => cube)
-      .reduce((prev, cube) => prev + (cube.active ? 1 : 0), 0);
-  };
-  return cycle(cubes, 6);
-}
+const runPartB = () =>
+  cycle(parse(readFile("17", "b") as string[]), 6, (cube: Cube) =>
+    expanded(cube.x, cube.y, cube.z, cube.w, 1)
+  );
 
 console.log(`Solution part A: ${runPartA()}`);
 console.log(`Solution part B: ${runPartB()}`);
