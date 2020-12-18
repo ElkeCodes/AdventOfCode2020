@@ -1,22 +1,24 @@
 import readFile from "../../utils/readFile";
 
-const peek = (arr) => arr[arr.length - 1];
+const peek = (arr: string[]): string => arr[arr.length - 1];
 
-const calculate = (line: string[], hasGreaterPrecedence: Function): number => {
-  const parse = (line: string[]): (string | number)[] => {
+type OutputQueue = (string | number)[];
+
+const calculate = (
+  line: string,
+  hasGreaterPrecedence: (_: string, __: string) => boolean
+): number => {
+  const parse = (line: string[]): OutputQueue => {
     const operatorStack = [];
     const outputQueue = [];
-    const inner = (line: string[]): (string | number)[] => {
+    const inner = (line: string[]): OutputQueue => {
       if (line.length === 0) {
         while (operatorStack.length > 0) {
           outputQueue.push(operatorStack.pop());
         }
         return outputQueue;
       } else {
-        const token = line[0];
-        if (token === " ") {
-          return inner(line.slice(1));
-        }
+        const [token, ...remaining] = line;
         switch (token) {
           case "+":
           case "*":
@@ -42,43 +44,40 @@ const calculate = (line: string[], hasGreaterPrecedence: Function): number => {
             break;
         }
 
-        return inner(line.slice(1));
+        return inner(remaining);
       }
     };
     return inner(line);
   };
 
-  const calc = (outputQueue): number => {
-    const calcStack = [];
+  const calc = (outputQueue: OutputQueue): number => {
+    const calcStack: number[] = [];
     while (outputQueue.length > 0) {
-      while (!isNaN(outputQueue[0])) {
-        calcStack.push(outputQueue.shift());
+      while (!isNaN(outputQueue[0] as number)) {
+        calcStack.push(outputQueue.shift() as number);
       }
       const nextOperator = outputQueue.shift();
       const operand1 = calcStack.pop();
       const operand2 = calcStack.pop();
-      let result = 0;
       switch (nextOperator) {
         case "+":
-          result = operand1 + operand2;
+          calcStack.push(operand1 + operand2);
           break;
         case "*":
-          result = operand1 * operand2;
+          calcStack.push(operand1 * operand2);
           break;
       }
-      calcStack.push(result);
     }
 
     return calcStack[0];
   };
-  return calc(parse(line));
+  return calc(parse(line.split("").filter((token) => token !== " ")));
 };
 
 function runPartA() {
   const lines = readFile("18", "a") as string[];
   return lines.reduce(
-    (prev, line) =>
-      prev + calculate(line.split(""), (first, _) => first !== "("),
+    (prev, line) => prev + calculate(line, (first, _) => first !== "("),
     0
   );
 }
@@ -89,7 +88,7 @@ function runPartB() {
     (prev, line) =>
       prev +
       calculate(
-        line.split(""),
+        line,
         (first, second) => first !== "(" && first === "+" && second === "*"
       ),
     0
