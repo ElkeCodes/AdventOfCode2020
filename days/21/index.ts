@@ -19,10 +19,10 @@ const parse = (
       while (
         Math.max.apply(
           Math,
-          Array.from(ingredientsList.values()).map((ing) => ing.size)
+          [...ingredientsList.values()].map((ing) => ing.size)
         ) > 1
       ) {
-        const filterList = Array.from(ingredientsList.values()).filter(
+        const filterList = [...ingredientsList.values()].filter(
           (x) => x.size === 1
         );
         for (let f of filterList) {
@@ -74,11 +74,8 @@ function runPartA() {
   );
 
   return (
-    Array.from(ingredientsOccurences.values()).reduce(
-      (prev, curr) => prev + curr,
-      0
-    ) -
-    Array.from(ingredientsList.values()).reduce((prev, value: Set<string>) => {
+    [...ingredientsOccurences.values()].reduce((prev, curr) => prev + curr, 0) -
+    [...ingredientsList.values()].reduce((prev, value: Set<string>) => {
       return prev + ingredientsOccurences.get(value.values().next().value);
     }, 0)
   );
@@ -89,7 +86,7 @@ function runPartB() {
     readFile("21", "b") as string[]
   );
 
-  return Array.from(ingredientsList)
+  return [...ingredientsList]
     .sort(([keyA, _], [keyB, __]) => keyA.localeCompare(keyB))
     .map(([_, ingredient]) => ingredient.values().next().value)
     .join(",");
