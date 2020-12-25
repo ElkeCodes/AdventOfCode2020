@@ -4,7 +4,7 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "start": "node ./utils/start.js"
+    "start": "node --max_old_space_size=8192 ./utils/start.js"
   },
   "dependencies": {
     "ts-node": "^9.0.0",
